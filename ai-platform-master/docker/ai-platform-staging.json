@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "paradox-mo",
+  "private_key_id": "89e9630d03de8b834f0c1e59b10ef661331d2ef6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC/Uhl+capNTnBD\nJ9a8ZS5uKHjDfl/a+qfGXM3bh30hrRoyjXcKzGjQNjcobgYTDvaC9AKqAo43ngUG\nup/Q3B6ykleLs5/rhjxE2LKN4tB3VgPm4qpBD7mKxxwAqrba8rmCo2uAE9MSOuaG\n/vDxEzblK6h/NJ227KOCz0JHhwmtcD9P3QVDvkZgJh8XUjc7PbB7Y/S9L9LbM56Q\nwJe/7mKeIpRs4Lhulyii+F8gBfTcpSwyxUJ7UhfACS+8FpJTGxuR03kAbvOrzzzH\nF1dgs3DhQrhkeEVbCaHt2NkB9sv7LbxAhu9hKzNoXa95460DVsps/ReDhMYrPnHE\nuiCw0dP9AgMBAAECgf98zhHTalKuG30gUdzDCT5AniYpYUcmklzgCapAiyIV1dZB\nJAeEA9Rb/wH8XcmYpSoqQwN55DDiFzMwMI4QsYdU9iImAAdSnT6zqqjP5iYXswTY\nmQR3bMqcvUaHKNYf/jcGAZUe98+5FLNNXQHQQbiNxu0kDi7UJYqEyq9x+aVWfcFc\nZ16p7ppX5PBWSoUnr3i4/TFlwfSIUFy7qjS8A1L4pjbMweB+6trqI7GYV2uqxUt3\nKTbLlXxCqLE4pkygS2den0omqsQ3h11J+thQyCGGjfJBvqrNUr5LVlHtWvJ9I489\n2t7e1SGKATNlloauvUyXzeVq9Cxw6WDIrNJsssECgYEA7V4j16qn8UOXcGtdw2xJ\nv+c6r4m1/toTTT2HN1yD+AGoOTOtn4/0Vo3KNKkXG9s5k5jJQfJ2deXNOQScRsdD\nvBQiJUkcgklwzRS2ro8x+eKO8Ooh1iV9OugxorTFTkX/oze6ciPCngWkbXtHXh2D\nm0C/wSissOYgVbvJIdBa0PECgYEAzlanMhfbrBEQjJesn5Ri4igmVXiInegvzvQk\nAkRr3BKOABeE1pDFikrXY5cSFMbgKFXWK4YaDWWCjSC54VnghlRDemMTuBO8lkyt\nGc16pgtyrCyhqifESPMicCXVtSHi6O4afzGZopzEYxqG9xsSEAEoqMr6bxuZBYH2\nMtgAs80CgYEAzmSx87/u4ajtEBI7aEZLZjLP43xxpFTIvbvHTAsEsOv38y0NRhXs\n1inZ7aotbspTKRSLwuzptiAILxDkNeLj8bDr89G7mUn0bE4bfnMCeI5XzgE3RLY6\nSrNFHX3jpejVnH1DgCW5/p9XVt7/skUlfyRw16rfZb3j1cg/3kgF/3ECgYEAuw+H\n6DwE5Mtbq3nd/5Ywx0MK7bWmdTGIFiDzfDK3bf5MSf0IatU4oRUUi67rr3ZUxXx7\n+11JxRdf8b3XhltK170Qp6WmvNz3vXKqA5hrNpluTnTv4yjGJDR35iAGzH16Dx29\nW86FsAxbZlUoQmGCUIwcZloODCiC46Fcp993U4kCgYEAur16Dlj37rX9JkNYxdq+\nGOMAGf0S/1ZSR4aUWYsInP93QF3RhASx0iWHsjON/cNOKhodkpEJzZuie+IscVFB\nvxtY9utlCxb7IOrg+zu+T74Lhefk7Fb8dKokjQnpNqqR9N/CB4omRRaXxI2aMobX\ntTfgP8RvRrPWEB/v4HzqZSU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "paradox-mo@paradox-mo.iam.gserviceaccount.com",
+  "client_id": "107201540748630352513",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/paradox-mo%40paradox-mo.iam.gserviceaccount.com"
+}

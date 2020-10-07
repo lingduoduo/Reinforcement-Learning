@@ -1,0 +1,39 @@
+trainingInput:
+  hyperparameters:
+    goal: MINIMIZE
+    hyperparameterMetricTag: val_loss
+    maxTrials: 100
+    maxParallelTrials: 10
+    params:
+      - parameterName: n-conv-layers
+        type: INTEGER
+        minValue: 1
+        maxValue: 3
+      - parameterName: n-conv-filters-layer-0
+        type: INTEGER
+        minValue: 2
+        maxValue: 64
+        scaleType: UNIT_LOG_SCALE
+      - parameterName: conv-filter-growth
+        type: DOUBLE
+        minValue: 1
+        maxValue: 2
+      - parameterName: conv-activation
+        type: CATEGORICAL
+        categoricalValues:
+          - 'tanh'
+          - 'relu'
+      - parameterName: n-dense-layers
+        type: INTEGER
+        minValue: 1
+        maxValue: 4
+      - parameterName: dense-activation
+        type: CATEGORICAL
+        categoricalValues:
+          - 'tanh'
+          - 'relu'
+      - parameterName: dropout-rate
+        type: DOUBLE
+        minValue: 0.01
+        maxValue: 0.5
+        scaleType: UNIT_LOG_SCALE
