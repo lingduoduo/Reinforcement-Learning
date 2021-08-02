@@ -1,0 +1,25 @@
+---
+# Read more about Data Endpoints configuration in Confluence: https://confluence.spotify.net/pages/viewpage.action?pageId=49977566
+defaults:
+  owner: life-acquatic
+  lifecycle: experimental
+  facts:
+    sysmodelComponentId: belafonte-ranker
+  pagerDutyKey: 32554ce059414cc19628f591f2b53691
+
+endpoints:
+  - name: acmacquisition.belafonte_content_ranking.belafonte_content_ranking_YYYYMMDD
+    partitioning: DAYS
+    description: 'belafonte-ranker scio pipeline'
+    isContinuous: true
+    storageUriPattern: bq://acmacquisition/belafonte_content_ranking/belafonte_content_ranking_%Y%M%D
+    start: 2019-08-13
+    latenessSlo: PT19H
+
+
+  - name: acmacquisition.belafonte_content_ranking.user_retention_prediction_YYYYMMDD
+    partitioning: DAYS
+    description: 'belafonte-ranker xgboost user prediction pipeline'
+    isContinuous: true
+    storageUriPattern: bq://acmacquisition/belafonte_content_ranking/user_retention_prediction_YYYYMMDD
+    start: 2020-06-01

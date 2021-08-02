@@ -1,0 +1,83 @@
+# Service Information File for System-Z in YAML format.
+
+# Basic YAML syntax here: http://www.yaml.org/spec/1.2/spec.html
+# Online parser here: http://yaml-online-parser.appspot.com/
+# Short version:
+#   Strings: single, double or no quotes. Multiline string? Read docs.
+#   Lists: with [] or each entry indented on a line with a - .
+#   Maps: with {key: val} or each pair indented on a line.
+#     (also, x means "x", but no means false, because reasons.)
+
+# The main doc for `data-info.yaml` live here:
+# https://confluence.spotify.net/display/DI/Scheduling+a+Workflow
+
+# Unique ID for this component (in System-Z):
+id: belafonte-ranker
+
+# Brief description of this component:
+description: 'belafonte-ranker scio pipeline'
+
+# The system this component belongs to:
+system: belafonte-ranker
+
+# Main owner of this component (LDAP group or individual):
+owner: life-acquatic
+
+# Intended usage of this component:
+#   'private' - only for use by the owner
+#   'public'  - exposes an api for other squads (like metadata)
+# Components that are under development, experimental, not
+# supported, replaced, liable to change without warning, etc.
+# should generally be marked as private.
+visibility: private
+
+# A list of other components (services, data stores, etc.) on which
+# this component depends. Must be valid service_discovery names
+# registered in the Nameless service.
+#dependencies:
+#  - endsong-cleaned
+
+facts:
+  # Links to the latest definitive documentation for this service.
+  # Markdown is supported, e.g. docs: '[Title] (URL)'
+  repository: ghe:/edison/belafonte-ranker
+
+  docs: 'https://ghe.spotify.net/edison/belafonte-ranker/blob/master/README.md'
+
+  pagerdutykey: 32554ce059414cc19628f591f2b53691
+  slack_channel: '#life-acquatic'
+  support_email: <life-acquatic-private@spotify.com>
+  tags: ['scio', 'data', 'scala', 'scio-cookie']
+  lifecycle: experimental
+
+  workflows:
+    - id: acmacquisition.belafonte_content_ranking.belafonte_content_ranking_YYYYMMDD
+      schedule: 0 16 * * * # Run every day at 16pm UTC
+      offset: P1D
+      service_account: belafonte-ranker-wk@acmacquisition.iam.gserviceaccount.com
+      docker_args:
+        - wrap-luigi
+        - --module
+        - luigi_tasks
+        - BelafonteContentRankerJob
+        - --date
+        - '{}'
+      docker_termination_logging: true
+      alert_rules:
+          - type: failure
+            severity: error
+            ignore_weak_failures: true
+            failure_count: 1
+
+    - id: acmacquisition.belafonte_content_ranking.user_retention_prediction_YYYYMMDD
+      schedule: daily
+      service_account: belafonte-ranker-wk@acmacquisition.iam.gserviceaccount.com
+      docker_args:
+        - wrap-luigi
+        - --local-scheduler
+        - --module
+        - user_retention.user_retention_prediction
+        - UserRetentionPredictionJob
+        - --date
+        - '{}'
+      docker_termination_logging: true

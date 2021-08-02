@@ -1,0 +1,15 @@
+.idea
+.bigquery
+.repl
+target
+*.pyc
+.coverage
+.tox/
+coverage.xml
+junit.xml
+cobertura.xml
+_qstyx/
+.python-version
+.metals
+.bloop
+metals.sbt

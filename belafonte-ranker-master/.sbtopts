@@ -1,0 +1,10 @@
+# If your Scio pipeline uses BigQueryType, then uncomment the line below and specify your BigQuery project id
+-Dbigquery.project=acmacquisition
+-J-Dfile.encoding=UTF8
+-J-Xss1M
+-J-Xms1G
+-J-Xmx2G
+-J-XX:ReservedCodeCacheSize=512M
+-J-XX:MaxMetaspaceSize=1G
+-J-XX:+CMSClassUnloadingEnabled
+-J-Dsun.io.serialization.extendedDebugInfo=true
