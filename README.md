@@ -17,9 +17,11 @@ Suppose we have a good policy f(a|s)
 Suppose we know the optimal action-value fucntion Q(s, a)
 - Upone observe the state s_t, choose the action that maximizes the value: a_t = argmax_a Q(s_t, a)
 
-```
-conda create -n  reinforcement-learning python=3.10
 
 https://github.com/DeepRLChinese/DeepRL-Chinese
+```
+conda create -n  reinforcement-learning python=3.10
+pip install -r requirement.txt
+conda install -c conda-forge jupyter notebook
 ```
 
