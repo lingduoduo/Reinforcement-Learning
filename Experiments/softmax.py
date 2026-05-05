@@ -1,135 +1,97 @@
-
-##########################################################
-# BanditsBook/python/algorithms/softmax/standard.py
-##########################################################
 import math
 import random
+from pathlib import Path
 
-def ind_max(x):
+
+def ind_max(x: list) -> int:
     m = max(x)
     return x.index(m)
 
-def categorical_draw(probs):
+
+def categorical_draw(probs: list) -> int:
     z = random.random()
     cum_prob = 0.0
-    for i in range(len(probs)):
-        prob = probs[i]
+    for i, prob in enumerate(probs):
         cum_prob += prob
         if cum_prob > z:
             return i
-    
     return len(probs) - 1
 
+
 class Softmax:
-    def __init__(self, temperature, counts, values):
+    def __init__(self, temperature: float, counts: list, values: list):
         self.temperature = temperature
         self.counts = counts
         self.values = values
-        return
-    
-    def initialize(self, n_arms):
-        self.counts = [0 for col in range(n_arms)]
-        self.values = [0.0 for col in range(n_arms)]
-        return
-    
-    def select_arm(self):
-        z = sum([math.exp(v / self.temperature) for v in self.values])
+
+    def initialize(self, n_arms: int):
+        self.counts = [0] * n_arms
+        self.values = [0.0] * n_arms
+
+    def select_arm(self) -> int:
+        z = sum(math.exp(v / self.temperature) for v in self.values)
         probs = [math.exp(v / self.temperature) / z for v in self.values]
         return categorical_draw(probs)
-    
-    def update(self, chosen_arm, reward):
-        self.counts[chosen_arm] = self.counts[chosen_arm] + 1
+
+    def update(self, chosen_arm: int, reward: float):
+        self.counts[chosen_arm] += 1
         n = self.counts[chosen_arm]
-        
         value = self.values[chosen_arm]
-        new_value = ((n - 1) / float(n)) * value + (1 / float(n)) * reward
-        self.values[chosen_arm] = new_value
-        return
-    
-algo = Softmax(1.0, [], []);
-algo.initialize(2)
+        self.values[chosen_arm] = ((n - 1) / n) * value + (1 / n) * reward
 
-##########################################################
-# BanditsBook/python/arms/bernoulli.py
-##########################################################
-class BernoulliArm():
-    def __init__(self, p):
+
+class BernoulliArm:
+    def __init__(self, p: float):
         self.p = p
-    
-    def draw(self):
-        if random.random() > self.p:
-            return 0.0
-        else:
-            return 1.0
 
-random.seed(1)
-means = [0.1, 0.1, 0.1, 0.1, 0.9]
-n_arms = len(means)
-random.shuffle(means)
-print(means)
-print("Best arm is " + str(ind_max(means)))
+    def draw(self) -> float:
+        return 1.0 if random.random() <= self.p else 0.0
 
-# arms = map(lambda mu: BernoulliArm(mu), means)
-arms = []
-for i in range(len(means)):
-    arms.append(BernoulliArm(means[i]))
-print(arms[0].draw())
-print(arms[1].draw())
-print(arms[2].draw())
-print(arms[3].draw())
-print(arms[4].draw())
 
-##########################################################
-# BanditsBook/python/testing_framework/tests.py
-##########################################################
-def test_algorithm(algo, arms, num_sims, horizon):
-    chosen_arms = [0.0 for i in range(num_sims * horizon)]
-    rewards = [0.0 for i in range(num_sims * horizon)]
-    cumulative_rewards = [0.0 for i in range(num_sims * horizon)]
-    sim_nums = [0.0 for i in range(num_sims * horizon)]
-    times = [0.0 for i in range(num_sims * horizon)]
+def test_algorithm(algo, arms: list, num_sims: int, horizon: int) -> list:
+    chosen_arms = [0.0] * (num_sims * horizon)
+    rewards = [0.0] * (num_sims * horizon)
+    cumulative_rewards = [0.0] * (num_sims * horizon)
+    sim_nums = [0.0] * (num_sims * horizon)
+    times = [0.0] * (num_sims * horizon)
 
     for sim in range(num_sims):
-        sim = sim + 1
         algo.initialize(len(arms))
-
         for t in range(horizon):
-            t = t + 1
-            index = (sim - 1) * horizon + t - 1
-            sim_nums[index] = sim
-            times[index] = t
+            index = sim * horizon + t
+            sim_nums[index] = sim + 1
+            times[index] = t + 1
 
             chosen_arm = algo.select_arm()
             chosen_arms[index] = chosen_arm
 
-            reward = arms[chosen_arms[index]].draw()
+            reward = arms[chosen_arm].draw()
             rewards[index] = reward
-
-            if t == 1:
-                cumulative_rewards[index] = reward
-            else:
-                cumulative_rewards[index] = cumulative_rewards[index - 1] + reward
+            cumulative_rewards[index] = reward if t == 0 else cumulative_rewards[index - 1] + reward
 
             algo.update(chosen_arm, reward)
 
     return [sim_nums, times, chosen_arms, rewards, cumulative_rewards]
 
 
-##########################################################
-# Book/python/algorithms/softmax/test_standard.py
-##########################################################
-f = open("/Users/ling/Desktop/Git/Python/Bandit/standard_softmax_results.tsv", "w")
+if __name__ == "__main__":
+    random.seed(1)
+    means = [0.1, 0.1, 0.1, 0.1, 0.9]
+    n_arms = len(means)
+    random.shuffle(means)
+    print(means)
+    print("Best arm is " + str(ind_max(means)))
 
-for temperature in [0.1, 0.2, 0.3, 0.4, 0.5]:
-  algo = Softmax(temperature, [], [])
-  algo.initialize(n_arms)
-  results = test_algorithm(algo, arms, 5000, 250)
-  for i in range(len(results[0])):
-      f.write(str(temperature) + "\t")
-      f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
+    arms = [BernoulliArm(mu) for mu in means]
 
-f.close()
+    output_dir = Path(__file__).parent / "results"
+    output_dir.mkdir(exist_ok=True)
 
-t = sum(self.counts) + 1
-temperature = 1 / math.log(t + 0.0000001)
-
+    with open(output_dir / "standard_softmax_results.tsv", "w") as f:
+        for temperature in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            algo = Softmax(temperature, [], [])
+            algo.initialize(n_arms)
+            results = test_algorithm(algo, arms, 5000, 250)
+            for i in range(len(results[0])):
+                f.write(str(temperature) + "\t")
+                f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")

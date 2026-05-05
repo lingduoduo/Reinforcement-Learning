@@ -1,132 +1,80 @@
-
-### Method 1: Epsilon-greedy Greedy
-
 import numpy as np
 
-N = 3                # 物品总数
-T = 100              # 试验次数/轮数
-epsilon = 0.1        # 贪婪系数
-P = [0.5, 0.6, 0.55] # 每个物品的真实被转化率
-Round = [0, 0, 0]    # 每个物品被选中的次数
+N = 3
+T = 100
+epsilon = 0.1
+P = [0.5, 0.6, 0.55]
 
 
-def pull(N, epsilon, P):
-    """通过epsilon-greedy来选择物品
+def pull(n: int, eps: float, p: list) -> int:
+    """Select an item via epsilon-greedy.
 
     Args:
-        N(int) :- 物品总数
-        epsilon(float) :- 贪婪系数
-        P(iterables) :- 每个物品被转化率
+        n: total number of items
+        eps: exploration coefficient
+        p: estimated conversion rates per item
     Returns:
-        本次选择的物品
+        index of selected item
     """
-    # 通过一致分布的随机数来确定是搜索还是利用
-    exploration_flag = True if np.random.uniform() <= epsilon else False
-
-    # 如果选择探索
-    if exploration_flag:
-        i = int(min(N-1, np.floor(N*np.random.uniform())))
-
-    # 如果选择利用
-    else:
-        i = np.argmax(P)
-    return i
+    if np.random.uniform() <= eps:
+        return int(min(n - 1, np.floor(n * np.random.uniform())))
+    return int(np.argmax(p))
 
 
-def trial_vanilla(rounds=T):
-    """做rounds轮试验
-
-    rewards来记录从头到位的奖励数
-    """
+def trial_vanilla(rounds: int = T) -> int:
+    """Run epsilon-greedy for `rounds` steps using module-level P, return total conversions."""
     rewards = 0
-    for t in range(rounds):
+    for _ in range(rounds):
         i = pull(N, epsilon, P)
+        rewards += np.random.binomial(1, P[i])
+    return rewards
+
+
+def calculate_delta(round_counts: list, i: int) -> float:
+    """UCB confidence half-width for arm i."""
+    round_i = round_counts[i]
+    if round_i == 0:
+        return 1.0
+    return np.sqrt(np.log(sum(round_counts)) / round_i)
+
+
+def calculate_empirical(round_counts: list, reward_counts: list, i: int) -> float:
+    """Empirical conversion rate for arm i."""
+    round_i = round_counts[i]
+    if round_i == 0:
+        return 1.0
+    return reward_counts[i] / round_i
+
+
+def trial_ucb(reward_counts: list, round_counts: list, rounds: int = T) -> int:
+    """Run UCB for `rounds` steps, return total conversions."""
+    rewards = 0
+    for _ in range(rounds):
+        p_ucb = [
+            calculate_empirical(round_counts, reward_counts, i) + calculate_delta(round_counts, i)
+            for i in range(len(round_counts))
+        ]
+        i = pull(N, epsilon, p_ucb)
+        round_counts[i] += 1
         reward = np.random.binomial(1, P[i])
+        reward_counts[i] += reward
         rewards += reward
     return rewards
 
-# Method 2: UCB
 
-def calculate_delta(Round, i):
-    """利用所有物品被选中的次数和i物品被选中的次数来计算delta
-    
-    Args:
-        Round(iterables） ：- 每个物品被选择的次数
-        i(int) :- 物品序号
-    Returns:
-        使得置信度为1-2/ sum(Round) ** 2的delta
-    """
-    round_i = Round[i]
-    if round_i == 0:
-        return 1
-    else:
-        return np.sqrt(np.log(sum(Round))/round_i)
+Alpha = [25, 50, 75]
+Beta_params = [75, 50, 25]
 
-def calculate_empirical(Round, Reward, i):
-    """利用所有物品被选中和获得奖励的次数来计算实证参数
-    
-    Args:
-        Round(iterables） ：- 每个物品被选择的次数
-        Reward(iterables) :- 每个物品获得奖励的次数
-        i(int) :- 物品序号
-    Returns:
-        i物品的实证参数
-    """
-    round_i = Round[i]
-    if round_i == 0:
-        return 1
-    else:
-        return Reward[i]/round_i
 
-def trial_ucb(Reward, Round, rounds=T):
-    """做rounds轮试验
-    
-    Args:
-        Reward(iterables) :- 每个物品的被转化次数
-        Round(iterables） ：- 每个物品被选择的次数
-        rounds(int) :- 一共试验的次数
-    Returns:
-        一共的转化数
-
-    rewards来记录从头到位的奖励数
-    """
+def trial_thompson(alpha: list, beta: list, round_counts: list, rounds: int = T) -> int:
+    """Run Thompson sampling for `rounds` steps, return total conversions."""
     rewards = 0
-    for t in range(rounds):
-        P_ucb = [calculate_empirical(Round, Reward, i) + calculate_delta(Round, i) for i in range(len(Round))]
-        i = pull(N, epsilon, P_ucb)
-        Round[i] += 1
+    for _ in range(rounds):
+        p_thompson = [np.random.beta(alpha[i], beta[i]) for i in range(len(round_counts))]
+        i = pull(N, epsilon, p_thompson)
+        round_counts[i] += 1
         reward = np.random.binomial(1, P[i])
-        Reward[i] += reward
-        rewards += reward
-    return rewards
-
-    
-
-### Method 3: Thompson Sampling
-
-
-# 每个物品被转化率的Beta先验参数
-Alpha = [25, 50, 75] 
-Beta = [75, 50, 25]
-
-def trial_thompson(Alpha, Beta, rounds=T):
-    """做rounds轮试验
-
-    Args:
-        Alpha, Beta(iterables) :- 每个物品被转化率的Beta分布的参数
-        rounds(int) :- 一共试验的次数
-    Returns:
-        一共的转化数
-
-    rewards来记录从头到位的奖励数
-    """
-    rewards = 0
-    for t in range(rounds):
-        P_thompson = [np.random.beta(Alpha[i], Beta[i]) for i in range(len(Round))]
-        i = pull(N, epsilon, P_thompson)
-        Round[i] += 1
-        reward = np.random.binomial(1, P[i])
-        Alpha[i] += reward
-        Beta[i] += 1 - reward
+        alpha[i] += reward
+        beta[i] += 1 - reward
         rewards += reward
     return rewards

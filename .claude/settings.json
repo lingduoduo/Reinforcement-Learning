@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"git (commit|push)\"; then bash .git/hooks/pre-commit 2>&1 || { echo \"Claude Code: pre-commit validation failed — fix issues before committing\"; exit 1; }; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
