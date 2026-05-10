@@ -77,23 +77,7 @@ class Qnet(torch.nn.Module):
         x = F.relu(self.fc1(x))  
         return self.fc2(x)
 
-# class ConvolutionalQnet(torch.nn.Module):
-#     def __init__(self, action_dim, in_channels=4):
-#         super(ConvolutionalQnet, self).__init__()
-#         self.conv1 = torch.nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
-#         self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
-#         self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
-#         self.fc4 = torch.nn.Linear(7 * 7 * 64, 512)
-#         self.head = torch.nn.Linear(512, action_dim)
-
-#     def forward(self, x):
-#         x = x / 255
-#         x = F.relu(self.conv1(x))
-#         x = F.relu(self.conv2(x))
-#         x = F.relu(self.conv3(x))
-#         x = F.relu(self.fc4(x))
-#         return self.head(x)
-    
+# VanillaDQN
 class DQN:
     def __init__(self,
                  state_dim,
@@ -307,22 +291,20 @@ plt.close()
 
 
 class VAnet(torch.nn.Module):
-    ''' 只有一层隐藏层的A网络和V网络 '''
     def __init__(self, state_dim, hidden_dim, action_dim):
         super(VAnet, self).__init__()
-        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)  # 共享网络部分
+        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)  
         self.fc_A = torch.nn.Linear(hidden_dim, action_dim)
         self.fc_V = torch.nn.Linear(hidden_dim, 1)
 
     def forward(self, x):
         A = self.fc_A(F.relu(self.fc1(x)))
         V = self.fc_V(F.relu(self.fc1(x)))
-        Q = V + A - A.mean(1).view(-1, 1)  # Q值由V值和A值计算得到
+        Q = V + A - A.mean(1).view(-1, 1) 
         return Q
 
-
+# Double DQN/Dueling DQN
 class DQN:
-    ''' DQN算法,包括Double DQN和Dueling DQN '''
     def __init__(self,
                  state_dim,
                  hidden_dim,
@@ -334,7 +316,7 @@ class DQN:
                  device,
                  dqn_type='VanillaDQN'):
         self.action_dim = action_dim
-        if dqn_type == 'DuelingDQN':  # Dueling DQN采取不一样的网络框架
+        if dqn_type == 'DuelingDQN':  
             self.q_net = VAnet(state_dim, hidden_dim,
                                self.action_dim).to(device)
             self.target_q_net = VAnet(state_dim, hidden_dim,
@@ -429,3 +411,17 @@ plt.ylabel('Q value')
 plt.title('Dueling DQN on {}'.format(env_name))
 plt.savefig('Experiments/dueling_dqn_q_values.png')
 plt.close()
+
+# content-based retrieval
+# + UCB bandit
+# + replay buffer
+# + reward model
+
+# DQN ranking
+# + Double DQN target update
+# + Dyna-style planning
+
+# Q-learning gives the RL framing.
+# DQN makes it scalable with embeddings.
+# Double DQN makes ranking more stable.
+# Dyna-Q improves cold-start sample efficiency through simulated feedback.
