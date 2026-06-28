@@ -22,22 +22,27 @@ def perpendiculars(action):
         return ("left", "right")
     return ("up", "down")
 
-# Step 1: build the GridWorld MDP model
+
+# The model p(s', r | s, a): with prob (1 - SLIP) we move as intended, and
+# with prob SLIP we slip sideways (split over the two perpendicular moves).
+# Every step costs -1, so the optimal policy is the shortest path to TERMINAL.
 def transitions(state, action):
     if state == TERMINAL:
         return [(state, 0.0, 1.0)]
-    outcomes = []
-    p_intended = 1.0 - SLIP
-    outcomes.append((apply_move(state, action), -1.0, p_intended))
+    outcomes = [(apply_move(state, action), -1.0, 1.0 - SLIP)]
     for perp in perpendiculars(action):
         outcomes.append((apply_move(state, perp), -1.0, SLIP / 2.0))
     return outcomes
 
 
+# q_pi(s, a) = sum_{s',r} p(s',r | s,a) [ r + gamma * V(s') ]
 def q_value(state, action, V, gamma):
     return sum(p * (r + gamma * V[s_next]) for s_next, r, p in transitions(state, action))
 
-# Step 2: policy evaluation
+
+# Iterative policy evaluation (Sutton & Barto, Section 4.1).
+#   Input: policy(s) -> {action: prob}
+#   Loop:  V(s) <- sum_a pi(a|s) * q(s, a)  until max change < tol
 def policy_evaluation(policy, gamma=0.99, tol=1e-6, max_iter=5000):
     V = {s: 0.0 for s in states()}
     for _ in range(max_iter):
@@ -53,43 +58,33 @@ def policy_evaluation(policy, gamma=0.99, tol=1e-6, max_iter=5000):
             return V
     return V
 
-# Step 3: policy improvement
-def policy_improvement(V, gamma=0.99):
-    new_policy = {}
-    for s in states():
-        best_a = max(
-            ACTIONS,
-            key=lambda a: sum(p * (r + gamma * V[s_prime])
-                              for s_prime, r, p in transitions(s, a)),
-        )
-        new_policy[s] = best_a
-    return new_policy
 
-
+# Greedy (policy improvement) step: pi'(s) = argmax_a q(s, a) (Section 4.2).
 def greedy_from_V(V, gamma=0.99):
     policy = {}
     for state in states():
         if state == TERMINAL:
             policy[state] = "up"
             continue
-        best = max(ACTIONS, key=lambda a: q_value(state, a, V, gamma))
-        policy[state] = best
+        policy[state] = max(ACTIONS, key=lambda a: q_value(state, a, V, gamma))
     return policy
 
-# Step 4: stitch them together
+
+# Policy iteration: alternate evaluation and improvement until the policy
+# stops changing (Section 4.3).
 def policy_iteration(gamma=0.99, tol=1e-6):
-    policy = {s: "up" for s in states()}
-    sweeps = 0
+    policy = {s: "up" for s in states()}   # arbitrary start
     for it in range(100):
         V = policy_evaluation(lambda s: {policy[s]: 1.0}, gamma=gamma, tol=tol)
-        sweeps += 1
         new_policy = greedy_from_V(V, gamma)
         if new_policy == policy:
             return V, policy, it + 1
         policy = new_policy
     return V, policy, 100
 
-# Step 5: value iteration (the one-loop version)
+
+# Value iteration: fold evaluation and improvement into one Bellman-optimality
+# sweep, V(s) <- max_a q(s, a), then read off the greedy policy (Section 4.4).
 def value_iteration(gamma=0.99, tol=1e-6, max_iter=5000):
     V = {s: 0.0 for s in states()}
     for it in range(max_iter):

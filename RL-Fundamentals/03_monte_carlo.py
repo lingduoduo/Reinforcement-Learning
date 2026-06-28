@@ -12,6 +12,7 @@ def reset():
     return (0, 0)
 
 
+# Unlike DP, MC needs no model p(s',r|s,a) — it only samples the environment.
 def step(state, action):
     if state == TERMINAL:
         return state, 0.0, True
@@ -26,6 +27,7 @@ def states():
     return [(r, c) for r in range(GRID) for c in range(GRID)]
 
 
+# Generate one episode S0,A0,R1, ..., S_{T-1},A_{T-1},R_T following policy.
 def rollout(policy, rng, max_steps=200):
     trajectory = []
     state = reset()
@@ -39,6 +41,7 @@ def rollout(policy, rng, max_steps=200):
     return trajectory
 
 
+# Reverse sweep to get the return G_t = R_{t+1} + gamma * G_{t+1} for each step.
 def returns_from(trajectory, gamma):
     returns = []
     G = 0.0
@@ -53,6 +56,10 @@ def uniform_policy(_state, rng):
     return rng.choice(ACTIONS)
 
 
+# First-visit MC prediction (Sutton & Barto, Section 5.1).
+#   For each episode, for the first occurrence of s, append G_t to Returns(s)
+#   and set V(s) = average. We keep that average incrementally:
+#   V(s) <- V(s) + (G - V(s)) / N(s).
 def mc_policy_evaluation(policy, episodes, gamma=0.99, rng=None):
     rng = rng or random.Random(0)
     V = defaultdict(float)
@@ -62,7 +69,7 @@ def mc_policy_evaluation(policy, episodes, gamma=0.99, rng=None):
         returns = returns_from(trajectory, gamma)
         seen = set()
         for (s, _, _), G in zip(trajectory, returns):
-            if s in seen:
+            if s in seen:        # first-visit: skip later visits to s
                 continue
             seen.add(s)
             counts[s] += 1
@@ -70,6 +77,10 @@ def mc_policy_evaluation(policy, episodes, gamma=0.99, rng=None):
     return V, counts
 
 
+# On-policy first-visit MC control with an epsilon-soft policy (Section 5.4).
+#   Behaviour policy is epsilon-greedy in Q, so every action keeps some
+#   probability and exploration never stops. After each episode:
+#   Q(s,a) <- Q(s,a) + (G - Q(s,a)) / N(s,a) on first visits to (s,a).
 def mc_control(episodes, gamma=0.99, epsilon=0.1, rng=None):
     rng = rng or random.Random(0)
     Q = defaultdict(lambda: {a: 0.0 for a in ACTIONS})
@@ -86,7 +97,7 @@ def mc_control(episodes, gamma=0.99, epsilon=0.1, rng=None):
         returns = returns_from(trajectory, gamma)
         seen = set()
         for (s, a, _), G in zip(trajectory, returns):
-            if (s, a) in seen:
+            if (s, a) in seen:   # first-visit on the (state, action) pair
                 continue
             seen.add((s, a))
             counts[s][a] += 1
@@ -122,7 +133,6 @@ def main():
     print_V(V, "V^pi(s)")
     print()
     print(f"V(0,0) MC estimate     = {V[(0,0)]:.2f}")
-    print(f"V(0,0) DP  reference   = -39.41   (from lesson 02 of this phase)")
     print(f"visit counts at (0,0)  = {counts[(0,0)]}")
     print()
 

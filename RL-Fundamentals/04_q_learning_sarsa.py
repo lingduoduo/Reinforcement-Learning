@@ -28,7 +28,13 @@ def epsilon_greedy(Q, state, rng, epsilon):
     q = Q[state]
     return max(ACTIONS, key=lambda a: q[a])
 
-# Step 1: SARSA on ε-greedy policy
+
+# SARSA: on-policy TD(0) control (Sutton & Barto, Section 6.4).
+#   Choose A from S using the eps-greedy policy, then bootstrap on the action
+#   A' the SAME policy actually takes next:
+#     Q(S,A) <- Q(S,A) + alpha [ R + gamma * Q(S',A') - Q(S,A) ]
+#   Because the target uses A' (exploration included), SARSA learns the value
+#   of the eps-greedy policy itself.
 def sarsa(episodes, alpha=0.1, gamma=0.99, epsilon=0.1, rng=None):
     rng = rng or random.Random(0)
     Q = defaultdict(lambda: {a: 0.0 for a in ACTIONS})
@@ -50,7 +56,12 @@ def sarsa(episodes, alpha=0.1, gamma=0.99, epsilon=0.1, rng=None):
         returns.append(total)
     return Q, returns
 
-# Step 2: Q-learning
+# Q-learning: off-policy TD(0) control (Sutton & Barto, Section 6.5).
+#   Behave eps-greedy, but bootstrap on the GREEDY next action regardless of
+#   what is taken:
+#     Q(S,A) <- Q(S,A) + alpha [ R + gamma * max_a Q(S',a) - Q(S,A) ]
+#   The max makes the target independent of the behaviour policy, so Q
+#   converges to the optimal q* even while exploring.
 def q_learning(episodes, alpha=0.1, gamma=0.99, epsilon=0.1, rng=None):
     rng = rng or random.Random(0)
     Q = defaultdict(lambda: {a: 0.0 for a in ACTIONS})
